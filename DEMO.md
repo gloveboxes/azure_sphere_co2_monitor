@@ -1,5 +1,15 @@
 # Azure Sphere CO2 Sensor Demo
 
+## Demo overview
+
+- [both] intro
+- [mike] show simple app that shows the value of app_manifest. Use CO2 app for consistancy
+- [dave] Build out CO2 demo Seeed Studio Mini
+- [dave] talk about IoT Hub, routing, enrichment
+- [mike] use use CO2 demo + Avnet, show telemetry in IoT Explorer, 
+- [mike] layer in the Event Grid, message filtering (based on value threshold), and Teams messages (can be any WebHook endpoint)
+- [dave] add CO2, and PowerBI
+- [both] close with call to action [Azure Sphere Developer Learning Path](http://aka.ms/azure-sphere-developer-learning-path)
 
 ## Introduction
 
@@ -22,9 +32,10 @@ Introduce hello world demo project structure
 	```bash
 	az iot hub monitor-events --hub-name <hub-name> --properties all --device-id <device_id>
 	```
+
 ---
 
-Demo flow
+## Demo flow
 
 1. Really important concept for Azure Sphere - the platform is secure by default
 2. Apps have no access to any resources unless explicitly declared - hardware and network endpoints 
