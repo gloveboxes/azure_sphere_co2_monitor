@@ -166,9 +166,47 @@ static void PublishTelemetryHandler(EventLoopTimer* eventLoopTimer) {
 
 ---
 
-## Discuss Initialization
+## CO2 Demo Telemetry
 
-```c
-
+```json
+{
+    "event": {
+        "origin": "4d660122b831da08fb32b3c70795e09b9a50abd7a556fe035b771b8aba5c195bf43daa5227983b993101fac76e7a5a4c1295a7571896dbfeda66ad5bfa6ac954",
+        "payload": {
+            "CO2": 969.71,
+            "Temperature": 31.26,
+            "Humidity": 45.0,
+            "Pressure": 1100.0,
+            "Longitude": 151.2122,
+            "Latitude": -33.8563,
+            "MsgId": -1
+        },
+        "annotations": {
+            "iothub-connection-device-id": "4d660122b831da08fb32b3c70795e09b9a50abd7a556fe035b771b8aba5c195bf43daa5227983b993101fac76e7a5a4c1295a7571896dbfeda66ad5bfa6ac954",
+            "iothub-connection-auth-method": "{\"scope\":\"device\",\"type\":\"x509Certificate\",\"issuer\":\"external\",\"acceptingIpFilterRule\":null}",
+            "iothub-connection-auth-generation-id": "637547758448037735",
+            "iothub-enqueuedtime": 1620021375309,
+            "iothub-message-source": "Telemetry",
+            "x-opt-sequence-number": 1156752,
+            "x-opt-offset": "420915998736",
+            "x-opt-enqueued-time": 1620021375403
+        },
+        "properties": {
+            "system": {
+                "content_encoding": "utf-8",
+                "content_type": "application/json"
+            },
+            "application": {
+                "appid": "co2monitor",
+                "type": "telemetry",
+                "schema": "1",
+                "name": "Sydney Reactor CO2 Monitor",
+                "latitude": "-33.8767984",
+                "weather-location": "Sydney, AU",
+                "longitude": "151.2083053"
+            }
+        }
+    }
+}
 ```
 
