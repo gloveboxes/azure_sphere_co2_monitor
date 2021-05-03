@@ -25,9 +25,15 @@ Introduce hello world demo project structure
 
 ## Set up
 
+1. Clone the demo repo: 
+
+    ```bash
+    git clone --recurse-submodules gloveboxes/azure_sphere_co2_monitor (github.com)
+    ```
+    
 1. Open Azure Portal
-2. Start Azure Portal Command Shell
-3. Start IoT Hub monitor
+1. Start Azure Portal Command Shell
+1. Start IoT Hub monitor
 
 	```bash
 	az iot hub monitor-events --hub-name <hub-name> --properties all --device-id <device_id>
