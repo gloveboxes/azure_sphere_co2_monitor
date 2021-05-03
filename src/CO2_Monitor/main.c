@@ -32,8 +32,8 @@ float co2_ppm = NAN, temperature = NAN, relative_humidity = NAN;
 static char msgBuffer[JSON_MESSAGE_BYTES] = { 0 };
 
 // Timers
-static DX_TIMER measureSensorTimer = { .period = {20, 0}, .name = "measureSensorTimer", .handler = MeasureSensorHandler };
-static DX_TIMER publishTelemetryTimer = { .period = {4, 0}, .name = "publishTelemetryTimer", .handler = PublishTelemetryHandler };
+static DX_TIMER measureSensorTimer = { .period = {4, 0}, .name = "measureSensorTimer", .handler = MeasureSensorHandler };
+static DX_TIMER publishTelemetryTimer = { .period = {2, 0}, .name = "publishTelemetryTimer", .handler = PublishTelemetryHandler };
 
 DX_TIMER* timerSet[] = { &measureSensorTimer, &publishTelemetryTimer };
 
@@ -52,7 +52,7 @@ DX_DEVICE_TWIN_BINDING* deviceTwinBindingSet[] = {
 };
 
 // Define the message to be sent to Azure IoT Hub
-static const char* MsgTemplate = "{ \"CO2\": %3.2f, \"Temperature\": %3.2f, \"Humidity\": %3.1f, \"Pressure\": %3.1f, \"Longitude\": %lf, \"Latitude\":%lf, \"MsgId\":%d }";
+static const char* MsgTemplate = "{ \"CO2\": %3.2f, \"Temperature\": %3.2f, \"Humidity\": %3.1f, \"Pressure\": %3.1f, \"Longitude\": %lf, \"Latitude\":%lf }";
 
 // Attach application properties when sending telemetry to Azure IoT Hub
 static DX_MESSAGE_PROPERTY* telemetryMessageProperties[] = {

@@ -3,6 +3,7 @@
 ## Demo overview
 
 - [both] intro
+- [Mike] The anatomy of a secure purpose built IoT App
 - [mike] show simple app that shows the value of app_manifest. Use CO2 app for consistancy
 - [dave] Build out CO2 demo Seeed Studio Mini
 - [dave] talk about IoT Hub, routing, enrichment
