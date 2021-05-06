@@ -41,7 +41,10 @@ static const char* MsgTemplate = "{ \"CO2\": %3.2f, \"Temperature\": %3.2f, \"Hu
 // Declare Azure IoT Device Twins
 
 
-// Declare message properties
+// Declare message application properties
+
+
+// Declare message system properties
 
 
 // Declare timer event handlers
