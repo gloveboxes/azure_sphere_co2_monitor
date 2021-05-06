@@ -70,7 +70,7 @@ Introduce hello world demo project structure
 ## Timers
 
 ```c
-static DX_TIMER measureSensorTimer = { .period = {20, 0}, .name = "measureSensorTimer", .handler = MeasureSensorHandler };
+static DX_TIMER measureSensorTimer = { .period = {4, 0}, .name = "measureSensorTimer", .handler = MeasureSensorHandler };
 static DX_TIMER publishTelemetryTimer = { .period = {4, 0}, .name = "publishTelemetryTimer", .handler = PublishTelemetryHandler };
 
 DX_TIMER* timerSet[] = { &measureSensorTimer, &publishTelemetryTimer };
