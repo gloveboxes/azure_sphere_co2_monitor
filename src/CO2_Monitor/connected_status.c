@@ -62,9 +62,9 @@ void ConnectedLedOnHandler(EventLoopTimer* eventLoopTimer) {
 			first_connect = false;
 			locInfo = GetLocationData();
 			// update long, lat, and country code device twins
-			dx_deviceTwinReportState(&reportedLatitude, &locInfo->lat);
-			dx_deviceTwinReportState(&reportedLongitude, &locInfo->lng);
-			dx_deviceTwinReportState(&reportedCountryCode, &locInfo->countryCode);
+			//dx_deviceTwinReportState(&reportedLatitude, &locInfo->lat);
+			//dx_deviceTwinReportState(&reportedLongitude, &locInfo->lng);
+			//dx_deviceTwinReportState(&reportedCountryCode, &locInfo->countryCode);
 		}
 
 	} else {

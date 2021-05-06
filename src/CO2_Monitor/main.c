@@ -9,7 +9,7 @@
 #include "buzzer_alert.h"
 #include "co2_manager.h"
 #include "connected_status.h"
-#include "hvac_status.h"
+//#include "hvac_status.h"
 #include "location_from_ip.h"
 
 #include "applibs_versions.h"
@@ -39,16 +39,11 @@ DX_TIMER* timerSet[] = { &measureSensorTimer, &publishTelemetryTimer };
 
 // Azure IoT Device Twins
 DX_DEVICE_TWIN_BINDING desiredCO2AlertLevel = { .twinProperty = "DesiredCO2AlertLevel", .twinType = DX_TYPE_INT, .handler = DeviceTwinGenericHandler };
-DX_DEVICE_TWIN_BINDING desiredTemperature = { .twinProperty = "DesiredTemperature", .twinType = DX_TYPE_INT, .handler = DeviceTwinGenericHandler };
 DX_DEVICE_TWIN_BINDING reportedCO2Level = { .twinProperty = "ReportedCO2Level", .twinType = DX_TYPE_FLOAT };
-DX_DEVICE_TWIN_BINDING reportedCountryCode = { .twinProperty = "ReportedCountryCode",.twinType = DX_TYPE_STRING };
-DX_DEVICE_TWIN_BINDING reportedLatitude = { .twinProperty = "ReportedLatitude",.twinType = DX_TYPE_DOUBLE };
-DX_DEVICE_TWIN_BINDING reportedLongitude = { .twinProperty = "ReportedLongitude",.twinType = DX_TYPE_DOUBLE };
 
 // Initialize Sets
 DX_DEVICE_TWIN_BINDING* deviceTwinBindingSet[] = {
-	&desiredCO2AlertLevel, &reportedCO2Level, &desiredTemperature, 
-	&reportedLatitude, &reportedLongitude, &reportedCountryCode 
+	&desiredCO2AlertLevel, &reportedCO2Level
 };
 
 // Define the message to be sent to Azure IoT Hub
@@ -99,8 +94,6 @@ static void MeasureSensorHandler(EventLoopTimer* eventLoopTimer) {
 	if (scd30_read_measurement(&co2_ppm, &temperature, &relative_humidity) != STATUS_OK) {
 		co2_ppm = NAN;
 	}
-
-	SetHvacStatusColour((int)temperature);
 }
 
 /// <summary>
@@ -109,7 +102,6 @@ static void MeasureSensorHandler(EventLoopTimer* eventLoopTimer) {
 static void DeviceTwinGenericHandler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
 	dx_deviceTwinReportState(deviceTwinBinding, deviceTwinBinding->twinState);
 	dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
-	SetHvacStatusColour((int)temperature);
 }
 
 /// <summary>
