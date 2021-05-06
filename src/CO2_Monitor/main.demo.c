@@ -28,7 +28,9 @@ static void PublishTelemetryHandler(EventLoopTimer* eventLoopTimer);
 
 DX_USER_CONFIG dx_config;
 struct location_info* locInfo = NULL;
+
 float co2_ppm = NAN, temperature = NAN, relative_humidity = NAN;
+
 static char msgBuffer[JSON_MESSAGE_BYTES] = { 0 };
 
 // Define the message to be sent to Azure IoT Hub
