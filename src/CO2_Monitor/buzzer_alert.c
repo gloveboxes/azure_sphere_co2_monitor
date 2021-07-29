@@ -3,9 +3,9 @@
 static void CO2AlertBuzzerOffOneShotTimer(EventLoopTimer* eventLoopTimer);
 static void CO2AlertBuzzerOnHandler(EventLoopTimer* eventLoopTimer);
 
-static DX_GPIO co2AlertBuzzerPin = { .pin = CO2_ALERT, .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = false, .name = "co2AlertBuzzerPin" };
-static DX_TIMER co2AlertBuzzerOffOneShotTimer = { .period = { 0, 0 }, .name = "co2AlertBuzzerOffOneShotTimer", .handler = CO2AlertBuzzerOffOneShotTimer };
-static DX_TIMER co2AlertBuzzerOnTimer = { .period = {4, 0}, .name = "co2AlertBuzzerOnTimer", .handler = CO2AlertBuzzerOnHandler };
+static DX_GPIO_BINDING co2AlertBuzzerPin = { .pin = CO2_ALERT, .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = false, .name = "co2AlertBuzzerPin" };
+static DX_TIMER_BINDING co2AlertBuzzerOffOneShotTimer = { .name = "co2AlertBuzzerOffOneShotTimer", .handler = CO2AlertBuzzerOffOneShotTimer };
+static DX_TIMER_BINDING co2AlertBuzzerOnTimer = { .period = {4, 0}, .name = "co2AlertBuzzerOnTimer", .handler = CO2AlertBuzzerOnHandler };
 
 static const struct timespec co2AlertBuzzerPeriod = { 0, 5 * 100 * 1000 }; // 500 microseconds
 
@@ -42,7 +42,7 @@ static void CO2AlertBuzzerOnHandler(EventLoopTimer* eventLoopTimer) {
 		dx_gpioOpen(&co2AlertBuzzerPin);
 	}
 
-	if (desiredCO2AlertLevel.twinStateUpdated && !isnan(co2_ppm) && co2_ppm > *(int*)desiredCO2AlertLevel.twinState) {
+	if (desiredCO2AlertLevel.propertyUpdated && !isnan(co2_ppm) && co2_ppm > *(int*)desiredCO2AlertLevel.propertyValue) {
 		dx_gpioOn(&co2AlertBuzzerPin);
 		dx_timerOneShotSet(&co2AlertBuzzerOffOneShotTimer, &co2AlertBuzzerPeriod);
 	}

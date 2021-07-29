@@ -20,6 +20,7 @@
 
 #define JSON_MESSAGE_BYTES 256 // Number of bytes to allocate for the JSON telemetry message for IoT Central
 #define OneMS 1000000		// used to simplify timer defn.
+#define NETWORK_INTERFACE "wlan0"
 
  // Forward signatures
 static void DeviceTwinGenericHandler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
@@ -28,59 +29,38 @@ static void PublishTelemetryHandler(EventLoopTimer* eventLoopTimer);
 
 DX_USER_CONFIG dx_config;
 struct location_info* locInfo = NULL;
+
 float co2_ppm = NAN, temperature = NAN, relative_humidity = NAN;
+
 static char msgBuffer[JSON_MESSAGE_BYTES] = { 0 };
 
-// Timers
-static DX_TIMER measureSensorTimer = { .period = {4, 0}, .name = "measureSensorTimer", .handler = MeasureSensorHandler };
-static DX_TIMER publishTelemetryTimer = { .period = {2, 0}, .name = "publishTelemetryTimer", .handler = PublishTelemetryHandler };
+DX_DEVICE_TWIN_BINDING desiredCO2AlertLevel = { .propertyName = "DesiredCO2AlertLevel", .twinType = DX_DEVICE_TWIN_INT, .handler = DeviceTwinGenericHandler };
+DX_DEVICE_TWIN_BINDING reportedCO2Level = { .propertyName = "ReportedCO2Level", .twinType = DX_DEVICE_TWIN_FLOAT };
 
-DX_TIMER* timerSet[] = { &measureSensorTimer, &publishTelemetryTimer };
-
-// Azure IoT Device Twins
-DX_DEVICE_TWIN_BINDING desiredCO2AlertLevel = { .twinProperty = "DesiredCO2AlertLevel", .twinType = DX_TYPE_INT, .handler = DeviceTwinGenericHandler };
-DX_DEVICE_TWIN_BINDING reportedCO2Level = { .twinProperty = "ReportedCO2Level", .twinType = DX_TYPE_FLOAT };
+static DX_TIMER_BINDING measureSensorTimer = { .period = {4, 0}, .name = "measureSensorTimer", .handler = MeasureSensorHandler };
+static DX_TIMER_BINDING publishTelemetryTimer = { .period = {4, 0}, .name = "publishTelemetryTimer", .handler = PublishTelemetryHandler };
 
 // Initialize Sets
-DX_DEVICE_TWIN_BINDING* deviceTwinBindingSet[] = {
-	&desiredCO2AlertLevel, &reportedCO2Level
-};
+DX_TIMER_BINDING* timerSet[] = { &measureSensorTimer, &publishTelemetryTimer };
+DX_DEVICE_TWIN_BINDING* deviceTwinBindingSet[] = { &desiredCO2AlertLevel, &reportedCO2Level };
 
-// Define the message to be sent to Azure IoT Hub
-static const char* MsgTemplate = "{ \"CO2\": %3.2f, \"Temperature\": %3.2f, \"Humidity\": %3.1f, \"Pressure\": %3.1f, \"Longitude\": %lf, \"Latitude\":%lf }";
 
-// Attach application properties when sending telemetry to Azure IoT Hub
+// Declare message application properties
 static DX_MESSAGE_PROPERTY* telemetryMessageProperties[] = {
 	&(DX_MESSAGE_PROPERTY) { .key = "appid", .value = "co2monitor" },
 	&(DX_MESSAGE_PROPERTY) {.key = "type", .value = "telemetry" },
 	&(DX_MESSAGE_PROPERTY) {.key = "schema", .value = "1" }
 };
 
-// Attach content properties when sending telemetry to Azure IoT Hub
+
+// Declare message system properties
 static DX_MESSAGE_CONTENT_PROPERTIES telemetryContentProperties = {
 	.contentEncoding = "utf-8",
 	.contentType = "application/json"
 };
 
-/*Timer event handlers******************************************/
-static void PublishTelemetryHandler(EventLoopTimer* eventLoopTimer) {
-	const float pressure = 1100.0;
 
-	if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
-		dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
-		return;
-	}
-
-	if (!isnan(co2_ppm) && locInfo != NULL) {
-		if (snprintf(msgBuffer, JSON_MESSAGE_BYTES, MsgTemplate, co2_ppm, temperature, relative_humidity, pressure, locInfo->lng, locInfo->lat) > 0) {
-			
-			Log_Debug("%s\n", msgBuffer);
-
-			dx_azureMsgSendWithProperties(msgBuffer, telemetryMessageProperties, NELEMS(telemetryMessageProperties), &telemetryContentProperties);
-		}
-		dx_deviceTwinReportState(&reportedCO2Level, &co2_ppm);
-	}
-}
+// Declare timer event handlers
 
 /// <summary>
 /// Read sensor and send to Azure IoT
@@ -96,12 +76,44 @@ static void MeasureSensorHandler(EventLoopTimer* eventLoopTimer) {
 	}
 }
 
+static void PublishTelemetryHandler(EventLoopTimer* eventLoopTimer) {
+	const float pressure = 1100.0;
+
+	if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+		dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+		return;
+	}
+
+	if (!isnan(co2_ppm) && locInfo != NULL) {
+
+		// Serialize telemetry as JSON
+		bool serialization_result = dx_jsonSerialize(msgBuffer, sizeof(msgBuffer), 6,
+			DX_JSON_DOUBLE, "CO2", co2_ppm,
+			DX_JSON_DOUBLE, "Temperature", temperature,
+			DX_JSON_DOUBLE, "Humidity", relative_humidity,
+			DX_JSON_DOUBLE, "Pressure", pressure,
+			DX_JSON_DOUBLE, "Longitude", locInfo->lng,
+			DX_JSON_DOUBLE, "Latitude", locInfo->lat
+		);
+
+		if (serialization_result) {
+			Log_Debug("%s\n", msgBuffer);
+			dx_azurePublish(msgBuffer, strlen(msgBuffer), telemetryMessageProperties, NELEMS(telemetryMessageProperties), &telemetryContentProperties);
+		} else {
+			Log_Debug("JSON Serialization failed: Buffer too small\n");
+		}
+
+		dx_deviceTwinReportValue(&reportedCO2Level, &co2_ppm);
+	}
+}
+
+
 /// <summary>
 /// Generic Device Twin Handler to acknowledge device twin received
 /// </summary>
 static void DeviceTwinGenericHandler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
-	dx_deviceTwinReportState(deviceTwinBinding, deviceTwinBinding->twinState);
-	dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+	dx_deviceTwinReportValue(deviceTwinBinding, deviceTwinBinding->propertyValue);
+	dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
 }
 
 /// <summary>
@@ -109,13 +121,13 @@ static void DeviceTwinGenericHandler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) 
 /// </summary>
 /// <returns>0 on success, or -1 on failure</returns>
 static void InitPeripheralGpiosAndHandlers(void) {
-	dx_azureInitialize(dx_config.scopeId, NULL);
+	dx_azureConnect(&dx_config, NETWORK_INTERFACE, NULL);
 	InitializeSdc30();
 	scd30_read_measurement(&co2_ppm, &temperature, &relative_humidity);
-	dx_deviceTwinSetOpen(deviceTwinBindingSet, NELEMS(deviceTwinBindingSet));
+	dx_deviceTwinSubscribe(deviceTwinBindingSet, NELEMS(deviceTwinBindingSet));
 	dx_timerSetStart(timerSet, NELEMS(timerSet));
 	CO2AlertBuzzerInitialize();
-	ConnectedStatusInitialise();	
+	ConnectedStatusInitialise();
 }
 
 /// <summary>
@@ -124,17 +136,18 @@ static void InitPeripheralGpiosAndHandlers(void) {
 static void ClosePeripheralGpiosAndHandlers(void) {
 	dx_timerSetStop(timerSet, NELEMS(timerSet));
 	dx_azureToDeviceStop();
-	dx_deviceTwinSetClose();
+	dx_deviceTwinUnsubscribe();
 	scd30_stop_periodic_measurement();
 	dx_timerEventLoopStop();
 }
 
 int main(int argc, char* argv[]) {
 	dx_registerTerminationHandler();
-	dx_configParseCmdLineArguments(argc, argv, &dx_config);
-	if (!dx_configValidate(&dx_config)) {
+
+	if (!dx_configParseCmdLineArguments(argc, argv, &dx_config)) {
 		return dx_getTerminationExitCode();
 	}
+
 	InitPeripheralGpiosAndHandlers();
 
 	// Main loop

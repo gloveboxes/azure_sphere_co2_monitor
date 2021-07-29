@@ -19,8 +19,8 @@ set(SEEED_STUDIO_MINI TRUE "Seeed Studio Azure Sphere MT3620 Mini Dev Board")
 cmake_minimum_required (VERSION 3.10)
 project (AzureSphereIoTCentral C)
 
-azsphere_configure_tools(TOOLS_REVISION "21.01")
-azsphere_configure_api(TARGET_API_SET "9")
+azsphere_configure_tools(TOOLS_REVISION "21.07")
+azsphere_configure_api(TARGET_API_SET "10")
 
 
 add_subdirectory("AzureSphereDevX" out)
