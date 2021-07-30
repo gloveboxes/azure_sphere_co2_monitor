@@ -38,7 +38,7 @@ DX_DEVICE_TWIN_BINDING desiredCO2AlertLevel = { .propertyName = "DesiredCO2Alert
 DX_DEVICE_TWIN_BINDING reportedCO2Level = { .propertyName = "ReportedCO2Level", .twinType = DX_DEVICE_TWIN_FLOAT };
 
 static DX_TIMER_BINDING measureSensorTimer = { .period = {4, 0}, .name = "measureSensorTimer", .handler = MeasureSensorHandler };
-static DX_TIMER_BINDING publishTelemetryTimer = { .period = {4, 0}, .name = "publishTelemetryTimer", .handler = PublishTelemetryHandler };
+static DX_TIMER_BINDING publishTelemetryTimer = { .period = {60, 0}, .name = "publishTelemetryTimer", .handler = PublishTelemetryHandler };
 
 // Initialize Sets
 DX_TIMER_BINDING* timerSet[] = { &measureSensorTimer, &publishTelemetryTimer };
