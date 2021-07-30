@@ -1,3 +1,0 @@
-[submodule "src\\CO2_Monitor\\AzureSphereDevX"]
-	path = src\\CO2_Monitor\\AzureSphereDevX
-	url = https://github.com/microsoft/Azure-Sphere-DevX.git
