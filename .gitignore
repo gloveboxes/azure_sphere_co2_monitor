@@ -3,3 +3,4 @@
 /install/
 /.vs/
 *.pdf
+src/CO2_Monitor/app_manifest.json
